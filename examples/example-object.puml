@@ -1,9 +1,0 @@
-@startuml
-object order1 as "Order #1"
-object item1 as "Item A"
-object item2 as "Item B"
-object customer as "Customer"
-order1 --> item1: contains
-order1 --> item2: contains
-order1 --> customer: placed by
-@enduml

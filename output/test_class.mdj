@@ -1,0 +1,80 @@
+{
+  "_type": "Project",
+  "_id": "PROJECT0B04918AE087",
+  "name": "TestClassProject",
+  "ownedElements": [
+    {
+      "_type": "UMLModel",
+      "_id": "MODELD3B1FBCAF3D6",
+      "_parent": {
+        "$ref": "PROJECT0B04918AE087"
+      },
+      "name": "Model",
+      "ownedElements": [
+        {
+          "_type": "UMLClass",
+          "_id": "CLASS6C4B43222151",
+          "_parent": {
+            "$ref": "MODELD3B1FBCAF3D6"
+          },
+          "name": "NguoiDung",
+          "attributes": [
+            {
+              "_type": "UMLAttribute",
+              "_id": "ATTR6124A7EC9552",
+              "_parent": {
+                "$ref": "CLASS6C4B43222151"
+              },
+              "name": "id",
+              "type": "int"
+            },
+            {
+              "_type": "UMLAttribute",
+              "_id": "ATTR674F30E23D49",
+              "_parent": {
+                "$ref": "CLASS6C4B43222151"
+              },
+              "name": "ten",
+              "type": "string"
+            }
+          ],
+          "operations": [
+            {
+              "_type": "UMLOperation",
+              "_id": "OPER8C4540F29265",
+              "_parent": {
+                "$ref": "CLASS6C4B43222151"
+              },
+              "name": "dangNhap"
+            }
+          ]
+        },
+        {
+          "_type": "UMLClassDiagram",
+          "_id": "DIAG222F6F0170CC",
+          "_parent": {
+            "$ref": "MODELD3B1FBCAF3D6"
+          },
+          "name": "MainClassDiagram",
+          "ownedViews": [
+            {
+              "_type": "UMLClassView",
+              "_id": "VIEWA80B30F64853",
+              "_parent": {
+                "$ref": "DIAG222F6F0170CC"
+              },
+              "model": {
+                "$ref": "CLASS6C4B43222151"
+              },
+              "font": "Arial;13;0",
+              "left": 100,
+              "top": 100,
+              "width": 150,
+              "height": 100
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

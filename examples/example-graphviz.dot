@@ -1,8 +1,0 @@
-digraph G {
-    rankdir=LR;
-    node [shape=box];
-    Client -> API [label="request"];
-    API -> DB [label="query"];
-    DB -> API [label="result"];
-    API -> Client [label="response"];
-}

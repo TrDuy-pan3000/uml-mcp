@@ -1,1 +1,0 @@
-(symbol "RES" (pin_names (line (pin "1") (pin "2"))))

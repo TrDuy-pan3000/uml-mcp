@@ -1,9 +1,0 @@
-@startuml
-component [Web Server] as WS
-component [API Gateway] as GW
-component [User Service] as US
-component [Database] as DB
-WS --> GW
-GW --> US
-US --> DB
-@enduml

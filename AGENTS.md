@@ -1,11 +1,44 @@
 ## Learned User Preferences
 
-- In documentation and attributions, spell the maintainer name as Antoine Boucher; do not abbreviate it to "Antoine Bou".
 - Pin `astral-sh/setup-uv` in GitHub Actions to a full release tag (for example `v8.1.0`) or an explicit commit SHA; do not use a bare `@v8` ref, because that action is not published as a floating major tag and Actions fails to resolve it.
-- For the root `README.md`, prefer compact markdown tables for reference-style blocks (for example environment variables with defaults, deployment URLs, MCP tools and `uml://` resources) when improving scanability; keep deeper topics such as the diagram fallback pipeline in `docs/` rather than duplicating them in the README unless asked.
+- For the root `README.md`, prefer compact markdown tables for reference-style blocks when improving scanability.
+- This repo is primarily the **StarUML MCP Server** (TypeScript). Python UML-MCP source has been removed.
 
 ## Learned Workspace Facts
 
-- Python dependencies and the lockfile are driven by `uv` (`pyproject.toml`, `uv.lock`); after constraint changes, expect `uv lock` / `uv sync` and CI parity with `uv lock --check` where applicable; when the checked-in `requirements.txt` / `requirements-dev.txt` pins are maintained, regenerate them with `uv export` so they match the lockfile.
-- Diagram skills: canonical copy in `.skill/skills/uml-mcp-diagrams/SKILL.md`; Claude Code plugin copy in `plugins/uml-mcp/skills/uml-diagrams/SKILL.md`. Cursor uses `.cursor/mcp.json` (hosted MCP) plus the `.skill` skill path—see `docs/integrations/cursor.md`.
-- Multi-version Python work in this repo has treated 3.12 as the primary baseline while also exercising 3.14 in CI matrices when supported; widening `requires-python` and regenerating the lock goes with that pattern.
+- TypeScript project: `npm run build` compiles `src/` to `build/` (NodeNext ESM).
+- Tests use **vitest**: `npm test` runs all tests in `tests/`.
+- Key dependencies: `@modelcontextprotocol/sdk`, `dagre` (layout engine), `node-fetch`, `zod`.
+- StarUML API defaults: built-in on port 58321, extension on port 58322.
+- `staruml-mcp-extension` is recommended for full features (position control, CRUD).
+- Mermaid classDiagram parser supports: inheritance, association, dependency, realization, aggregation, composition.
+- Dagre layout is computed server-side before sending positions to StarUML.
+- CI runs on Node 20 and 22 via GitHub Actions.
+
+## View creation limitation & workaround
+
+View-creation APIs (`factory.createViewOf`, `factory.createModelAndView`, `engine.addModelAndView`) do NOT work from the extension's main process (they require the renderer process). The only way to create elements WITH views on a diagram is via the built-in API's `/generate_diagram` endpoint (port 58321), which creates a complete diagram from Mermaid code.
+
+**For adding elements to existing diagrams**, the `add_to_diagram` tool works around this by:
+1. Reading the current diagram state via `/get_diagram_summary`
+2. Building a Mermaid representation of existing elements
+3. Parsing the new Mermaid code
+4. Merging (deduplicating by name)
+5. Computing dagre layout for the full set
+6. Calling `/generate_diagram` to create a new diagram with ALL elements
+7. Applying positions + routing via extension
+8. Deleting the old diagram
+
+Existing-element editing (rename, move, add/remove attributes/methods, change position, route edges) works directly via extension endpoints (`/update_element`, `/update_view`, `/route_diagram_edges`). Only ADDING new elements requires the rebuild approach.
+
+## Extension endpoint map (port 58322, 25 endpoints)
+
+- `/get_all_commands`, `/execute_command`
+- `/get_project_info`, `/save_project`, `/save_project_as`, `/new_project`, `/open_project`
+- `/get_element_by_id`, `/find_elements`, `/create_element`, `/update_element`, `/delete_element`
+- `/create_element_with_view`, `/create_edge_with_view`, `/create_view`
+- `/create_diagram`, `/switch_diagram`, `/close_diagram`
+- `/get_diagram_views`, `/get_diagram_summary`, `/update_view`, `/route_edge`, `/route_diagram_edges`, `/align_views`
+- `/debug`
+
+Key: `create_element` (model only) and `create_element_with_view` / `create_view` (model+view or view only) may fail to produce a view in the extension process. Use the rebuild approach instead.

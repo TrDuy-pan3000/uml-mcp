@@ -69,6 +69,17 @@ web_modules/
 # Output of 'npm pack'
 *.tgz
 
+# Python artifacts (legacy)
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+htmlcov/
+.coverage
+*.egg-info/
+dist/
+.python-version
+
 # Yarn Integrity file
 .yarn-integrity
 

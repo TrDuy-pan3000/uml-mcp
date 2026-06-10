@@ -1,4 +1,4 @@
-name: Run Tests
+name: Run Tests (TypeScript)
 
 on:
   workflow_dispatch:
@@ -9,77 +9,27 @@ on:
   workflow_call:
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v8.1.0
-        with:
-          version: "latest"
-          python-version: "3.12"
-          enable-cache: true
-          cache-dependency-glob: |
-            **/uv.lock
-            **/requirements*.txt
-
-      - name: Install dependencies
-        run: uv sync --all-groups
-
-      - name: Lint (pre-commit)
-        run: uv run pre-commit run --all-files
-
   test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.12", "3.14"]
+        node-version: ["20", "22"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v8.1.0
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          version: "latest"
-          python-version: ${{ matrix.python-version }}
-          enable-cache: true
-          cache-dependency-glob: |
-            **/uv.lock
-            **/requirements*.txt
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
 
       - name: Install dependencies
-        run: uv sync --all-groups
+        run: npm ci
+
+      - name: Build
+        run: npm run build
 
       - name: Run tests
-        run: |
-          uv run pytest --cov=mcp_core --cov=tools --cov-report=term --cov-report=html --cov-fail-under=82
-
-      - name: Health check (FastAPI UML API)
-        run: |
-          uv run python -c "
-          import subprocess, time
-          import httpx
-          p = subprocess.Popen(['uv', 'run', 'uvicorn', 'app:app', '--host', '127.0.0.1', '--port', '8765'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-          try:
-            time.sleep(3)
-            r = httpx.get('http://127.0.0.1:8765/health', timeout=5)
-            assert r.status_code == 200, r.status_code
-            print('Health check OK')
-          finally:
-            p.terminate()
-            p.wait(timeout=5)
-          "
-
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@v7
-        with:
-          name: coverage-report-${{ matrix.python-version }}
-          path: htmlcov/
-          retention-days: 14
-
-  build:
-    uses: ./.github/workflows/build.yml
+        run: npm test
